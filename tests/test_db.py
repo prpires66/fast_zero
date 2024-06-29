@@ -3,7 +3,7 @@ from sqlalchemy import select
 from fast_zero.models import User
 
 
-def test_cSreate_user(session):
+def test_create_user(session):
     user = User(
         username='dunossauro', email='email@email.com', password='secret'
     )
