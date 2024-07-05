@@ -40,7 +40,6 @@ def test_create_user_username_allready_username(client, user):
         },
     )
 
-    # Voltou o status code correto?
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json()['detail'] == 'Username already exists'
 
@@ -93,26 +92,28 @@ def test_read_user_by_id_not_found(client, user):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        '/users/1',
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'password': '123',
             'username': 'testusername2',
             'email': 'test@test.com',
-            'id': 1,
         },
     )
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'username': 'testusername2',
         'email': 'test@test.com',
-        'id': 1,
+        'id': user.id,
     }
 
 
-def test_update_user_not_found(client):
+def test_update_user_not_found(client, token):
     response = client.put(
         '/users/-1',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'password': '123',
             'username': 'testusername2',
@@ -124,14 +125,33 @@ def test_update_user_not_found(client):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_delete_user(client, user):
-    response = client.delete('/users/1')
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
     assert response.json() == {'message': 'User deleted'}
 
 
-def test_delete_user_not_found(client):
-    response = client.delete('/users/-1')
+def test_delete_user_not_found(client, token):
+    response = client.delete(
+        '/users/-1',
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'User not found'}
+
+
+def test_get_token(client, user):
+    response = client.post(
+        '/token',
+        data={'username': user.email, 'password': user.clean_password},
+    )
+
+    token = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert token['token_type'] == 'Bearer'
+    assert 'access_token' in token
