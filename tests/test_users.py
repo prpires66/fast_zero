@@ -27,9 +27,9 @@ def test_create_user_username_allready_username(client, user):
     response = client.post(
         '/users/',
         json={
-            'username': 'testeusername',
-            'email': 'someemail@email.com',
-            'password': 'senha123',
+            'username': user.username,
+            'email': 'teste@email.com',
+            'password': 'senhateste123',
         },
     )
 
@@ -42,7 +42,7 @@ def test_create_user_username_allready_email(client, user):
         '/users/',
         json={
             'username': 'someusername',
-            'email': 'teste@email.com',
+            'email': user.email,
             'password': 'senhateste123',
         },
     )
@@ -72,8 +72,8 @@ def test_read_user_by_id(client, user):
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'username': 'testeusername',
-        'email': 'teste@email.com',
+        'username': user.username,
+        'email': user.email,
         'id': 1,
     }
 
@@ -103,9 +103,9 @@ def test_update_user(client, user, token):
     }
 
 
-def test_update_wrong_user(client, user, token):
+def test_update_wrong_user(client, other_user, token):
     response = client.put(
-        f'/users/{user.id + 1}',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'password': '123',
