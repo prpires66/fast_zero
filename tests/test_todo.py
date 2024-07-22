@@ -19,6 +19,8 @@ def test_create_todo(client, token):
         'title': 'Test todo',
         'description': 'Test todo description',
         'state': 'draft',
+        'created_at': response.json()['created_at'],
+        'updated_at': None,
     }
 
 
